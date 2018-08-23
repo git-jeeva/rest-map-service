@@ -1,0 +1,26 @@
+Boston, New York, yes
+Philadelphia, Newark, yes
+Newark, Boston, yes
+Trenton, Albany, yes
+
+boston, new York, yes
+boston, new York, yes
+boston, new york, yes
+
+New York, Newark, yes
+Newark, New York, yes
+Philadelphia, Boston, yes
+Boston, Philadelphia, yes
+
+Newark, Philadelphia, yes
+Newark, Trenton, no
+Trenton, Newark, no
+Albany, Philadelphia, no
+Philadelphia, Albany, no
+
+boston,,no
+ Philadelphia , , no
+ Newark, , no
+Trenton , , no
+,,no
+ ,    ,no
