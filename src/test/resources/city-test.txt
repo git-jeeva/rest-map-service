@@ -1,26 +1,30 @@
-Boston, New York, yes
-Philadelphia, Newark, yes
-Newark, Boston, yes
-Trenton, Albany, yes
+boston,,no,Please provide a city for destination
 
-boston, new York, yes
-boston, new York, yes
-boston, new york, yes
+Boston, New York, yes, yes
+Philadelphia, Newark, yes, yes
+Newark, Boston, yes, yes
+Trenton, Albany, yes, yes
 
-New York, Newark, yes
-Newark, New York, yes
-Philadelphia, Boston, yes
-Boston, Philadelphia, yes
+boston, new York, yes, yes
+boston, new York, yes, yes
+boston, new york, yes, yes
 
-Newark, Philadelphia, yes
-Newark, Trenton, no
-Trenton, Newark, no
-Albany, Philadelphia, no
-Philadelphia, Albany, no
+New York, Newark, yes, yes
+Newark, New York, yes, yes
+Philadelphia, Boston, yes, yes
+Boston, Philadelphia, yes, yes
 
-boston,,no
- Philadelphia , , no
- Newark, , no
-Trenton , , no
-,,no
- ,    ,no
+Newark, Philadelphia, yes, yes
+Newark, Trenton, no, no
+Trenton, Newark, no, no
+Albany, Philadelphia, no, no
+Philadelphia, Albany, no, no
+
+boston,, no,Please provide a city for destination
+ Philadelphia , , no, Please provide a city for destination
+ Newark, , no, Please provide a city for destination
+Trenton , , no, Please provide a city for destination
+,, no,Please provide a city for origin
+ ,    , no,Please provide a city for origin
+
+boston,boston, no,Please provide different cities for origin and destination

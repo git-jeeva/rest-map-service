@@ -20,55 +20,74 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Logger;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment= WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class MapServiceApplicationTests {
-	@Autowired
-	ApplicationContext ctx;
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+    private Logger log = Logger.getLogger(this.getClass().getName());
+    private static final String serviceUrl = "http://localhost:%d/connected?origin=%s&destination=%s";
 
-	@Autowired
-	private MapService service;
+    @Autowired
+    private ApplicationContext ctx;
 
-	@Value("classpath:city-test.txt")
-	private Resource file;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	private List<String> testCases;
+    @Autowired
+    private MapService service;
 
-	@LocalServerPort
-	private int port;
+    @Value("classpath:city-test.txt")
+    private Resource file;
 
-	private static final String serviceUrl = "http://localhost:%d/connected?origin=%s&destination=%s";
+    @LocalServerPort
+    private int port;
 
-	@Before
-	public void setUp() throws IOException {
-		testCases = Files.readAllLines(Paths.get(file.getURI()), StandardCharsets.UTF_8);
-	}
+    private List<String> testCases;
 
-	@Test
-	public void test() {
-		String getUrl = null;
-		System.out.println("serviceUrl: " + serviceUrl);
-		for (String line : testCases) {
-			if(line.trim().isEmpty()) continue;
+    @Before
+    public void setUp() throws IOException {
+        testCases = Files.readAllLines(Paths.get(file.getURI()), StandardCharsets.UTF_8);
+    }
 
-			String[] items = line.trim().split(",");
-			String expected = items[2].trim();
+    @Test
+    public void testMapService() {
+        String getUrl = null;
+        for (String line : testCases) {
+            if (line.trim().isEmpty()) {
+                continue;
+            }
 
-//			String message = (service.hasBFSPath(items[0], items[1])) ? "yes" : "no";
-//			assertEquals(message, expected);
-//			System.out.println(items[0] + " ==== " + items[1] + " -> " + message);
+            String[] items = line.trim().split(",");
+            String expected = items[2].trim();
 
-			getUrl = String.format(serviceUrl, port, items[0], items[1]);
-			ResponseEntity<String> response = restTemplate.getForEntity(getUrl, String.class);
-			String message = response.getBody();
-//			assertEquals(message, expected);
-			System.out.println(items[0] + " ==== " + items[1] + " -> " + message);
-		}
-	}
+            String message = (service.hasBFSPath(items[0], items[1])) ? "yes" : "no";
+            log.info(items[0] + " - " + items[1] + " -> " + message);
+            assertEquals(expected, message);
+        }
+    }
 
+    @Test
+    public void testRestApi() {
+        String getUrl = null;
+        log.info("serviceUrl: " + serviceUrl);
+        for (String line : testCases) {
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+
+            String[] items = line.trim().split(",");
+            String expected = items[3].trim();
+
+            getUrl = String.format(serviceUrl, port, items[0], items[1]);
+            ResponseEntity<String> response = restTemplate.getForEntity(getUrl, String.class);
+            String message = response.getBody();
+            log.info(items[0] + " - " + items[1] + " -> " + message);
+            assertEquals(expected, message);
+        }
+    }
 
 }

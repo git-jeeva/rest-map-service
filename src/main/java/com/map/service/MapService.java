@@ -7,55 +7,76 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.*;
+import java.util.logging.Logger;
 
+/**
+ * The MapService determines if two cities are connected using a breadth first search traversal algorithm.
+ * It has a worst case time complexity of O(|E| + |V|) and worst case space complexity of O(|V|),
+ * where cities (nodes) are denoted by Vertices (V) and connections between cities (roads) are denoted by edges (E)
+ */
 @Service
 public class MapService {
+    private Logger log = Logger.getLogger(this.getClass().getName());
+
     @Value("classpath:city.txt")
-    private Resource file;
+    private Resource cityConfig;
 
     private Map<String, Node> nodeMap = new HashMap<>();
 
-    private void visit(Node node) {
-        System.out.print(node.getName() + " ");
+    private void visit(Node node, StringBuilder sb) {
+        sb.append(node.getName()).append(" - ");
     }
 
-    public Map<String, Node> getNodeMap() {
-        return nodeMap;
+    /**
+     * Breadth-First-Search traversal to print connected cities
+     * @param root origin city
+     * @return String names of connected cities delimited by hyphen
+     */
+    public String bfs(String root) {
+        return bfs(nodeMap.get(getNodeKey(root)));
     }
 
-    public void bfs(Node root) {
-        if (root == null) return;
+    private String bfs(Node root) {
+        StringBuilder sb = new StringBuilder();
 
+        if (root == null) {
+            return "";
+        }
+
+        Set<Node> visitedSet = new HashSet<>();
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
 
         while (!queue.isEmpty()) {
             Node node = queue.poll();
 
-            if (node.isVisited()) continue;
+            if (visitedSet.contains(node)) {
+                continue;
+            }
 
-            visit(node);
-            node.setVisited(true);
+            visit(node, sb);
+            visitedSet.add(node);
 
             for (Node adjacent : node.getAdjacents()) {
                 queue.add(adjacent);
             }
         }
+
+        return sb.toString().substring(0, sb.length() - 3);
     }
 
-    public void addEdge(String src, String dest) {
-        String srcName = getNodeName(src);
-        String destName = getNodeName(dest);
+    private void addEdge(String src, String dest) {
+        String srcKey = getNodeKey(src);
+        String destKey = getNodeKey(dest);
 
-        Node srcNode = nodeMap.getOrDefault(srcName, new Node(srcName));
-        Node destNode = nodeMap.getOrDefault(destName, new Node(destName));
-        nodeMap.putIfAbsent(srcName, srcNode);
-        nodeMap.putIfAbsent(destName, destNode);
+        Node srcNode = nodeMap.getOrDefault(srcKey, new Node(src));
+        Node destNode = nodeMap.getOrDefault(destKey, new Node(dest));
+        nodeMap.putIfAbsent(srcKey, srcNode);
+        nodeMap.putIfAbsent(destKey, destNode);
 
         List<Node> srcAdjacents = srcNode.getAdjacents();
         List<Node> destAdjacents = destNode.getAdjacents();
@@ -63,26 +84,37 @@ public class MapService {
         if (!srcAdjacents.contains(destNode)) {
             srcAdjacents.add(destNode);
         }
-        if(!destAdjacents.contains(srcNode)) {
+        if (!destAdjacents.contains(srcNode)) {
             destAdjacents.add(srcNode);
         }
     }
 
+    /**
+     * Checks if the given cities are connected by road/s
+     * @param src origin city
+     * @param dest destination city
+     * @return boolean true if connected, false otherwise
+     */
     public boolean hasBFSPath(String src, String dest) {
-        String srcName = getNodeName(src);
-        String destName = getNodeName(dest);
+        if(src == null || src.trim().isEmpty() || dest == null || dest.trim().isEmpty() || getNodeKey(src).equals(getNodeKey(dest))) {
+            return false;
+        }
 
         Set<Node> visitedSet = new HashSet<>();
 
-        Node srcNode = nodeMap.get(srcName);
+        String srcKey = getNodeKey(src);
+        Node srcNode = nodeMap.get(srcKey);
+
         Queue<Node> queue = new LinkedList<>();
         queue.add(srcNode);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            if(current == null) continue;
+            if (current == null) {
+                continue;
+            }
 
-            if (getNodeName(current.getName()).equalsIgnoreCase(destName)) {
+            if (getNodeKey(current.getName()).equals(getNodeKey(dest))) {
                 return true;
             }
 
@@ -100,20 +132,38 @@ public class MapService {
         return false;
     }
 
-    private String getNodeName(String name) {
+    private String getNodeKey(String name) {
         return name.trim().toLowerCase();
     }
 
+    /**
+     * Application startup routine to initialize the graph of cities and their connections based on the
+     * configuration file - city.txt
+     */
     @EventListener(ApplicationReadyEvent.class)
-    public void init() throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(file.getURI()), StandardCharsets.UTF_8);
+    public void init() {
+        BufferedReader br = null;
+        String line;
 
-        for (String line : lines) {
-            String[] cities = line.split(",");
-            addEdge(cities[0], cities[1]);
+        try {
+            br = new BufferedReader(new InputStreamReader(cityConfig.getInputStream()));
+
+            while ((line = br.readLine()) != null) {
+                String[] cities = line.split(",");
+                addEdge(cities[0], cities[1]);
+            }
+        } catch (IOException e) {
+            log.severe(e.getMessage());
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                // Nothing to do here.
+            }
         }
 
-        System.out.print("BFS Traversal: ");
-        bfs(nodeMap.get(getNodeName("Boston")));
+        log.info("BFS Traversal: " + bfs("Boston") + System.lineSeparator());
     }
 }
