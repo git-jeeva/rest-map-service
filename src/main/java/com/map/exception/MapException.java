@@ -3,7 +3,7 @@ package com.map.exception;
 import java.io.IOException;
 
 /**
- * Application Exception
+ * Application specific exception
  */
 public class MapException extends Exception {
     public MapException(String message, IOException ioe) {

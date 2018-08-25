@@ -10,8 +10,8 @@ import org.springframework.boot.diagnostics.FailureAnalysis;
 public class ApplicationStartupFailureAnalyzer extends AbstractFailureAnalyzer<MapException> {
     @Override
     protected FailureAnalysis analyze(Throwable throwable, MapException cause) {
-        String description = "Application startup failed, [Reason]: " + cause.getMessage();
-        String action = "Please check startup configuration files";
+        final String description = "Application startup failed, [Reason]: " + cause.getMessage();
+        final String action = "Please check startup configuration files";
         return new FailureAnalysis(description, action, cause);
     }
 }

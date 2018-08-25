@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(description = "Operations pertaining to Map Service")
 public class MapController {
-
     @Autowired
     Messages messages;
 
@@ -37,21 +36,21 @@ public class MapController {
         final String messageCode;
 
         if (src.trim().isEmpty()) {
-            messageCode = Constants.ERROR_MISSING_ORIGIN;
+            messageCode = Constants.MSG_MISSING_ORIGIN;
         } else if (dest.trim().isEmpty()) {
-            messageCode = Constants.ERROR_MISSING_DESTINATION;
+            messageCode = Constants.MSG_MISSING_DESTINATION;
         } else if (src.trim().equalsIgnoreCase(dest.trim())) {
-            messageCode = Constants.ERROR_DIFFERENT_CITIES_REQUIRED;
+            messageCode = Constants.MSG_DIFFERENT_CITIES_REQUIRED;
         } else {
             boolean connected = mapService.hasBFSPath(src, dest);
-            messageCode = connected ? Constants.CONNECTION_FOUND : Constants.CONNECTION_NOT_FOUND;
+            messageCode = connected ? Constants.MSG_CONNECTION_FOUND : Constants.MSG_CONNECTION_NOT_FOUND;
         }
 
         return messages.get(messageCode);
     }
 
     /**
-     * Gets all the connected cities from the given city
+     * Gets all the connected cities starting from the given city
      *
      * @param src origin city
      * @return String names of connected cities delimited by hyphen
@@ -62,7 +61,7 @@ public class MapController {
         final String response;
 
         if (src.trim().isEmpty()) {
-            response = messages.get(Constants.ERROR_MISSING_ORIGIN);
+            response = messages.get(Constants.MSG_MISSING_ORIGIN);
         } else {
             response = mapService.bfs(src);
         }

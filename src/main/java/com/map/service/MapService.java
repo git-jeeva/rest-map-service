@@ -22,10 +22,12 @@ import java.util.logging.Logger;
  */
 @Service
 public class MapService {
+    private Logger log = Logger.getLogger(this.getClass().getName());
+
     @Autowired
     Messages messages;
-    private Logger log = Logger.getLogger(this.getClass().getName());
-    @Value("classpath:city.txt1")
+
+    @Value("classpath:city.txt")
     private Resource cityConfig;
 
     private Map<String, Node> nodeMap = new HashMap<>();
@@ -46,16 +48,18 @@ public class MapService {
 
     private String bfs(Node root) {
         final String bfsGraph;
+
         if (root == null) {
             bfsGraph = "";
         } else {
-            StringBuilder sb = new StringBuilder();
-            Set<Node> visitedSet = new HashSet<>();
-            Queue<Node> queue = new LinkedList<>();
+            final StringBuilder sb = new StringBuilder();
+            final Set<Node> visitedSet = new HashSet<>();
+
+            final Queue<Node> queue = new LinkedList<>();
             queue.add(root);
 
             while (!queue.isEmpty()) {
-                Node node = queue.poll();
+                final Node node = queue.poll();
 
                 if (visitedSet.contains(node)) {
                     continue;
@@ -68,17 +72,18 @@ public class MapService {
                     queue.add(adjacent);
                 }
             }
+
             bfsGraph = sb.toString().substring(0, sb.length() - 3);
         }
         return bfsGraph;
     }
 
     private void addEdge(String src, String dest) {
-        String srcKey = getNodeKey(src);
-        String destKey = getNodeKey(dest);
+        final String srcKey = getNodeKey(src);
+        final String destKey = getNodeKey(dest);
 
-        Node srcNode = nodeMap.getOrDefault(srcKey, new Node(src));
-        Node destNode = nodeMap.getOrDefault(destKey, new Node(dest));
+        final Node srcNode = nodeMap.getOrDefault(srcKey, new Node(src));
+        final Node destNode = nodeMap.getOrDefault(destKey, new Node(dest));
         nodeMap.putIfAbsent(srcKey, srcNode);
         nodeMap.putIfAbsent(destKey, destNode);
 
@@ -101,28 +106,26 @@ public class MapService {
             return false;
         }
 
-        Set<Node> visitedSet = new HashSet<>();
+        final Node srcNode = nodeMap.get(getNodeKey(src));
 
-        String srcKey = getNodeKey(src);
-        Node srcNode = nodeMap.get(srcKey);
+        final Set<Node> visitedNodeSet = new HashSet<>();
+        final Queue<Node> bfsQueue = new LinkedList<>();
+        bfsQueue.add(srcNode);
 
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(srcNode);
+        while (!bfsQueue.isEmpty()) {
+            final Node node = bfsQueue.poll();
 
-        while (!queue.isEmpty()) {
-            Node current = queue.poll();
-            if (getNodeKey(current.getName()).equals(getNodeKey(dest))) {
+            if (getNodeKey(node.getName()).equals(getNodeKey(dest))) {
                 return true;
             }
 
-            if (visitedSet.contains(current)) {
+            if (visitedNodeSet.contains(node)) {
                 continue;
             }
 
-            visitedSet.add(current);
-
-            for (Node adjacent : current.getAdjacents()) {
-                queue.add(adjacent);
+            visitedNodeSet.add(node);
+            for (Node adjacent : node.getAdjacents()) {
+                bfsQueue.add(adjacent);
             }
         }
 
@@ -139,10 +142,11 @@ public class MapService {
      */
     @PostConstruct
     public void init() throws MapException {
+        final String filePath = cityConfig.getFilename();
+        log.info("Loading file: " + filePath);
+
         BufferedReader br = null;
         String line;
-        String filePath = cityConfig.getFilename();
-        log.info("Loading file: " + filePath);
 
         try {
             br = new BufferedReader(new InputStreamReader(cityConfig.getInputStream()));
@@ -151,8 +155,6 @@ public class MapService {
                 String[] cities = line.split(",");
                 addEdge(cities[0], cities[1]);
             }
-
-            log.info("Loaded file: %s" + filePath);
         } catch (IOException ioe) {
             throw new MapException("Error while Loading file: " + filePath, ioe);
         } finally {
@@ -162,7 +164,5 @@ public class MapService {
                 // Nothing to do here.
             }
         }
-
-        log.info("BFS Traversal: " + bfs("Boston") + System.lineSeparator());
     }
 }

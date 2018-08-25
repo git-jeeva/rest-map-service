@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 @Api(description = "Custom error handler")
 @RestController
 public class CustomErrorController implements ErrorController {
-
     /**
      * Returns a simple error message based on the status code of a request
      *
@@ -26,9 +25,8 @@ public class CustomErrorController implements ErrorController {
     @ApiOperation(value = "Returns a simple error message based on the status code of a request")
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request) {
-
-        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+        final Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        final Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 
         return String.format(Constants.ERROR_DISPLAY_FORMAT, statusCode(status), message.toString());
     }

@@ -8,6 +8,7 @@ import java.util.Set;
  */
 public class Node {
     private String name;
+
     private Set<Node> adjacents = new HashSet<>();
 
     public Node(String name) {
