@@ -13,28 +13,24 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Custom error controller to display simple error messages based on status codes
  */
-@Api(description="Custom error handler")
+@Api(description = "Custom error handler")
 @RestController
 public class CustomErrorController implements ErrorController {
 
     /**
      * Returns a simple error message based on the status code of a request
+     *
      * @param request {@link HttpServletRequest}
      * @return String error message
      */
     @ApiOperation(value = "Returns a simple error message based on the status code of a request")
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request) {
-        String errorMessage = Constants.ERROR;
 
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         Object message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 
-        if (status != null) {
-            errorMessage = String.format(Constants.ERROR_DISPLAY_FORMAT, statusCode(status), message.toString());
-        }
-
-        return errorMessage;
+        return String.format(Constants.ERROR_DISPLAY_FORMAT, statusCode(status), message.toString());
     }
 
     private Integer statusCode(Object status) {
