@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Entry point for REST calls to access MapService
  */
 @RestController
-@Api(description="Operations pertaining to Map Service")
+@Api(description = "Operations pertaining to Map Service")
 public class MapController {
 
     @Autowired
@@ -26,7 +26,8 @@ public class MapController {
 
     /**
      * Checks if the given cities are connected
-     * @param src origin city
+     *
+     * @param src  origin city
      * @param dest destination city
      * @return boolean true if connected, false otherwise
      */
@@ -35,9 +36,9 @@ public class MapController {
     public String checkConnection(@RequestParam(value = "origin") String src, @RequestParam(value = "destination") String dest) {
         final String messageCode;
 
-        if (src == null || src.trim().isEmpty()) {
+        if (src.trim().isEmpty()) {
             messageCode = Constants.ERROR_MISSING_ORIGIN;
-        } else if (dest == null || dest.trim().isEmpty()) {
+        } else if (dest.trim().isEmpty()) {
             messageCode = Constants.ERROR_MISSING_DESTINATION;
         } else if (src.trim().equalsIgnoreCase(dest.trim())) {
             messageCode = Constants.ERROR_DIFFERENT_CITIES_REQUIRED;
@@ -51,6 +52,7 @@ public class MapController {
 
     /**
      * Gets all the connected cities from the given city
+     *
      * @param src origin city
      * @return String names of connected cities delimited by hyphen
      */
@@ -59,7 +61,7 @@ public class MapController {
     public String getConnections(@RequestParam(value = "origin") String src) {
         final String response;
 
-        if (src == null || src.trim().isEmpty()) {
+        if (src.trim().isEmpty()) {
             response = messages.get(Constants.ERROR_MISSING_ORIGIN);
         } else {
             response = mapService.bfs(src);

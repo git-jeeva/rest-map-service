@@ -10,6 +10,9 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ * Swagger configuration to configure and customize the Swagger-UI web page
+ */
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
@@ -21,6 +24,7 @@ public class SwaggerConfig {
                 .paths(PathSelectors.any())
                 .build().apiInfo(metaData());
     }
+
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
                 .title("Map Service REST API")

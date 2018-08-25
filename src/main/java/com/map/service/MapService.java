@@ -1,12 +1,14 @@
 package com.map.service;
 
+import com.map.exception.MapException;
 import com.map.model.Node;
+import com.map.util.Messages;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,19 +22,21 @@ import java.util.logging.Logger;
  */
 @Service
 public class MapService {
+    @Autowired
+    Messages messages;
     private Logger log = Logger.getLogger(this.getClass().getName());
-
-    @Value("classpath:city.txt")
+    @Value("classpath:city.txt1")
     private Resource cityConfig;
 
     private Map<String, Node> nodeMap = new HashMap<>();
 
     private void visit(Node node, StringBuilder sb) {
-        sb.append(node.getName()).append(" - ");
+        sb.append(node.getName().trim()).append(" - ");
     }
 
     /**
      * Breadth-First-Search traversal to print connected cities
+     *
      * @param root origin city
      * @return String names of connected cities delimited by hyphen
      */
@@ -41,32 +45,32 @@ public class MapService {
     }
 
     private String bfs(Node root) {
-        StringBuilder sb = new StringBuilder();
-
+        final String bfsGraph;
         if (root == null) {
-            return "";
-        }
+            bfsGraph = "";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            Set<Node> visitedSet = new HashSet<>();
+            Queue<Node> queue = new LinkedList<>();
+            queue.add(root);
 
-        Set<Node> visitedSet = new HashSet<>();
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
+            while (!queue.isEmpty()) {
+                Node node = queue.poll();
 
-        while (!queue.isEmpty()) {
-            Node node = queue.poll();
+                if (visitedSet.contains(node)) {
+                    continue;
+                }
 
-            if (visitedSet.contains(node)) {
-                continue;
+                visit(node, sb);
+                visitedSet.add(node);
+
+                for (Node adjacent : node.getAdjacents()) {
+                    queue.add(adjacent);
+                }
             }
-
-            visit(node, sb);
-            visitedSet.add(node);
-
-            for (Node adjacent : node.getAdjacents()) {
-                queue.add(adjacent);
-            }
+            bfsGraph = sb.toString().substring(0, sb.length() - 3);
         }
-
-        return sb.toString().substring(0, sb.length() - 3);
+        return bfsGraph;
     }
 
     private void addEdge(String src, String dest) {
@@ -78,25 +82,22 @@ public class MapService {
         nodeMap.putIfAbsent(srcKey, srcNode);
         nodeMap.putIfAbsent(destKey, destNode);
 
-        List<Node> srcAdjacents = srcNode.getAdjacents();
-        List<Node> destAdjacents = destNode.getAdjacents();
+        Set<Node> srcAdjacents = srcNode.getAdjacents();
+        Set<Node> destAdjacents = destNode.getAdjacents();
 
-        if (!srcAdjacents.contains(destNode)) {
-            srcAdjacents.add(destNode);
-        }
-        if (!destAdjacents.contains(srcNode)) {
-            destAdjacents.add(srcNode);
-        }
+        srcAdjacents.add(destNode);
+        destAdjacents.add(srcNode);
     }
 
     /**
      * Checks if the given cities are connected by road/s
-     * @param src origin city
+     *
+     * @param src  origin city
      * @param dest destination city
      * @return boolean true if connected, false otherwise
      */
     public boolean hasBFSPath(String src, String dest) {
-        if(src == null || src.trim().isEmpty() || dest == null || dest.trim().isEmpty() || getNodeKey(src).equals(getNodeKey(dest))) {
+        if (src == null || src.trim().isEmpty() || dest == null || dest.trim().isEmpty() || getNodeKey(src).equals(getNodeKey(dest))) {
             return false;
         }
 
@@ -110,10 +111,6 @@ public class MapService {
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            if (current == null) {
-                continue;
-            }
-
             if (getNodeKey(current.getName()).equals(getNodeKey(dest))) {
                 return true;
             }
@@ -140,10 +137,12 @@ public class MapService {
      * Application startup routine to initialize the graph of cities and their connections based on the
      * configuration file - city.txt
      */
-    @EventListener(ApplicationReadyEvent.class)
-    public void init() {
+    @PostConstruct
+    public void init() throws MapException {
         BufferedReader br = null;
         String line;
+        String filePath = cityConfig.getFilename();
+        log.info("Loading file: " + filePath);
 
         try {
             br = new BufferedReader(new InputStreamReader(cityConfig.getInputStream()));
@@ -152,14 +151,14 @@ public class MapService {
                 String[] cities = line.split(",");
                 addEdge(cities[0], cities[1]);
             }
-        } catch (IOException e) {
-            log.severe(e.getMessage());
+
+            log.info("Loaded file: %s" + filePath);
+        } catch (IOException ioe) {
+            throw new MapException("Error while Loading file: " + filePath, ioe);
         } finally {
             try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException e) {
+                br.close();
+            } catch (Exception e) {
                 // Nothing to do here.
             }
         }

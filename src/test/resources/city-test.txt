@@ -1,5 +1,3 @@
-boston,,no,Please provide a city for destination
-
 Boston, New York, yes, yes
 Philadelphia, Newark, yes, yes
 Newark, Boston, yes, yes
@@ -23,8 +21,8 @@ Philadelphia, Albany, no, no
 boston,, no,Please provide a city for destination
  Philadelphia , , no, Please provide a city for destination
  Newark, , no, Please provide a city for destination
-Trenton , , no, Please provide a city for destination
+Trenton ,, no, Please provide a city for destination
 ,, no,Please provide a city for origin
- ,    , no,Please provide a city for origin
+  ,    , no,Please provide a city for origin
 
-boston,boston, no,Please provide different cities for origin and destination
+Boston,boston, no,Please provide different cities for origin and destination

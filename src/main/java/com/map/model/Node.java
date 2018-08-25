@@ -1,14 +1,14 @@
 package com.map.model;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Model class for a node in Graph data structures
  */
 public class Node {
     private String name;
-    private List<Node> adjacents = new LinkedList<>();
+    private Set<Node> adjacents = new HashSet<>();
 
     public Node(String name) {
         this.name = name;
@@ -18,7 +18,7 @@ public class Node {
         return name;
     }
 
-    public List<Node> getAdjacents() {
+    public Set<Node> getAdjacents() {
         return adjacents;
     }
 }
